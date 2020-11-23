@@ -28,16 +28,22 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import com.hanoli.comun.utils.HeaderHandler;
+import com.hanoli.lista.delegate.ListaDelegate;
+import com.hanoli.lista.model.ConsultarListaRequest;
+import com.hanoli.lista.model.ConsultarListaResponse;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 
-@Path("/app")
+@Path("app")
 public class UploadFileService {
+	
+	private ListaDelegate delegate;
 	
 	  @GET
 	  @Path("/welcome")
-	  @Produces(MediaType.TEXT_PLAIN)
+	  @Produces (MediaType.APPLICATION_JSON)
 	  public String sayPlainTextHello() {
 	    return "Hola han";
 	  }
@@ -168,6 +174,29 @@ public class UploadFileService {
 	}
     
     
+    @Path("consultar")
+    @POST
+    @Consumes("application/json; charset=UTF-8")
+    @Produces("application/json; charset=UTF-8")
+    public Response consultarLista(ConsultarListaRequest request) {
+    	
+    	System.out.println("Llegue a consultar");
+    	
+    	ConsultarListaResponse resp;
+    	
+    	try {
+    		resp = new ConsultarListaResponse();
+        	resp.setHeader(HeaderHandler.handleResponseHeader(request.getHeader(), true));
+        	resp.setBody(delegate.consultarLista(request.getBody()));
+        	return Response.status(Response.Status.OK).entity(resp).build();		
+		} catch (Exception e) {
+			
+		}
+		return null;
+    	
+    
+    	
+    }
     
     
 	
