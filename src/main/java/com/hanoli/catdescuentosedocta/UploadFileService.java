@@ -1,16 +1,6 @@
 package com.hanoli.catdescuentosedocta;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,28 +8,29 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-
+import com.hanoli.comun.utils.StringUtils;
 import com.hanoli.comun.utils.HeaderHandler;
 import com.hanoli.lista.delegate.ListaDelegate;
 import com.hanoli.lista.model.ConsultarListaRequest;
 import com.hanoli.lista.model.ConsultarListaResponse;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
+
 
 
 @Path("app")
 public class UploadFileService {
 	
 	private ListaDelegate delegate;
+	
+	public UploadFileService() {
+		try {
+			delegate = StringUtils.getBean(ListaDelegate.class, ApplicationConfig.class);	
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		
+	}
+	
+	
 	
 	  @GET
 	  @Path("/welcome")
@@ -49,7 +40,7 @@ public class UploadFileService {
 	  }
     
     
-    @POST 
+  /*  @POST 
     @Path("/upload")  
     @Consumes("multipart/form-data")
     public Response handleDocumentUpload(@FormDataParam("file") InputStream uploadedInputStream,@FormDataParam("file") FormDataContentDisposition fileDetail){
@@ -171,7 +162,7 @@ public class UploadFileService {
 		    System.out.println();
 		}
 		
-	}
+	}*/
     
     
     @Path("consultar")
@@ -179,8 +170,6 @@ public class UploadFileService {
     @Consumes("application/json; charset=UTF-8")
     @Produces("application/json; charset=UTF-8")
     public Response consultarLista(ConsultarListaRequest request) {
-    	
-    	System.out.println("Llegue a consultar");
     	
     	ConsultarListaResponse resp;
     	
@@ -190,9 +179,9 @@ public class UploadFileService {
         	resp.setBody(delegate.consultarLista(request.getBody()));
         	return Response.status(Response.Status.OK).entity(resp).build();		
 		} catch (Exception e) {
-			
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
 		}
-		return null;
+	
     	
     
     	

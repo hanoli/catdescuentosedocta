@@ -60,7 +60,7 @@ public class Hibernate {
 				
 				dataSource.setUrl(String.format(properties.getProperty("datasource.urlFormat"), properties.getProperty("datasource.address"), properties.getProperty("datasource.connectionPort"),properties.getProperty("datasource.databaseName")));
 				dataSource.setUsername(properties.getProperty("datasource.username"));
-				dataSource.setPassword(properties.getProperty("datasource.databaseName"));
+				dataSource.setPassword(properties.getProperty("datasource.password"));
 				
 			//}
 			

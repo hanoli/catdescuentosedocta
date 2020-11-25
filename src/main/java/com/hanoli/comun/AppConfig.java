@@ -3,13 +3,21 @@ package com.hanoli.comun;
 import java.net.InetAddress;
 import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 import com.hanoli.comun.exception.UtilsException;
 
+@Configuration
+@PropertySource("classpath:config.properties")
 public class AppConfig {
 
-	private Environment environment;
+	@Autowired
+	private Environment environment;	
+	
+	
 	
 	protected Properties getProperties(String source, String... elements) throws UtilsException {
 		

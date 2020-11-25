@@ -23,8 +23,8 @@ public class ListaDelegateImpl implements ListaDelegate{
 	@Override
 	public ConsultarListaOut consultarLista(ConsultarListaIn input) {
 		
-		ConsultarListaOut consultarListaOut = null;
-		List<IhCatProveedor> daoResponse = null;
+		//ConsultarListaOut consultarListaOut;
+		//List<IhCatProveedor> daoResponse = null;
 		ConsultarListaOut output = null;
 		List<ListaOut> lista = new ArrayList<ListaOut>();
 		
@@ -36,10 +36,12 @@ public class ListaDelegateImpl implements ListaDelegate{
 			return output;
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			
 		}
 		
 		return output;
+		
+		
 		
 		
 	}

@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import org.springframework.stereotype.Component;
 
 import com.hanoli.comun.dao.impl.GenericDAOImpl;
+import com.hanoli.comun.exception.DAOException;
 import com.hanoli.lista.dao.ListaDAO;
 import com.hanoli.lista.entity.IhCatProveedor;
 import com.hanoli.lista.model.ConsultarListaIn;
@@ -21,8 +22,7 @@ import com.hanoli.lista.model.ConsultarListaOut;
 @Component("listaDAO")
 public class ListaDAOImpl extends GenericDAOImpl<IhCatProveedor,Integer> implements ListaDAO {
 
-	@Override
-	public ConsultarListaOut consultarListaPorParams(ConsultarListaIn input) {
+	public ConsultarListaOut consultarListaPorParams(ConsultarListaIn input) throws DAOException {
 		
 		ConsultarListaOut consultaLista = new ConsultarListaOut();
 		
@@ -39,45 +39,18 @@ public class ListaDAOImpl extends GenericDAOImpl<IhCatProveedor,Integer> impleme
 			CriteriaBuilder cb = getSession().getCriteriaBuilder();
 			
 			CriteriaQuery<IhCatProveedor> consulta = cb.createQuery(IhCatProveedor.class);
+		
 			Root<IhCatProveedor> rootProductos = consulta.from(IhCatProveedor.class);
 			Predicate allQueryAnd = null;
 			
 			List<Predicate> filtersQuery = new ArrayList<Predicate>();
 			List<IhCatProveedor> listaProveedor = new ArrayList<IhCatProveedor>();
 			
-			
 			if(id != null) {
+				
 				filtersQuery.add(cb.equal(rootProductos.get("id"), id));
-			}
-			
-			if((claveProveedor != null)&&(!claveProveedor.isEmpty())) {
-				filtersQuery.add(cb.equal(cb.upper(rootProductos.get("claveproveedor")),claveProveedor.toUpperCase()));
-			}
-
-			if((fechaFinVigencia != null)&&(!fechaFinVigencia.isEmpty())) {
-				Date dateFechaServicio = (Date) new SimpleDateFormat("dd/MM/yyyy").parse(input.getLista().getFechaServicio());
-				
-				filtersQuery.add(cb.lessThanOrEqualTo(rootProductos.get("fechainiciovigencia").as(Date.class), dateFechaServicio));
-				filtersQuery.add(cb.greaterThanOrEqualTo(rootProductos.get("fechafinvigencia").as(Date.class), dateFechaServicio));
 				
 			}
-			
-			if((claveConcepto != null) && (!claveConcepto.isEmpty())) {
-				
-				filtersQuery.add(cb.like(cb.upper(rootProductos.<String>get("claveconcepto")),"%"+claveConcepto.toUpperCase() +"%"));
-			}
-			
-			
-			if((descripcionConcepto != null) && (!descripcionConcepto.isEmpty())) {
-				
-				filtersQuery.add(cb.like(cb.upper(rootProductos.<String>get("descripcionconcepto")),"%"+descripcionConcepto.toUpperCase() +"%"));
-			}
-			
-			if((estatus != null) && (!estatus.isEmpty())) {
-				
-				filtersQuery.add(cb.like(cb.upper(rootProductos.<String>get("estatus")),"%"+estatus.toUpperCase() +"%"));
-			}
-			
 			
 			if(!filtersQuery.isEmpty()) {
 				allQueryAnd = cb.and(filtersQuery.toArray(new Predicate[filtersQuery.size()]));
@@ -101,14 +74,12 @@ public class ListaDAOImpl extends GenericDAOImpl<IhCatProveedor,Integer> impleme
 			
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			System.out.println(e);
+			throw new DAOException(e);
 		}finally {
 			
-			
+			closeTransaction();
 		}
-		
-		
-		return consultaLista;
 		
 	}
 	

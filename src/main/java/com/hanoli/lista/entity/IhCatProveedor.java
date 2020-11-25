@@ -65,7 +65,6 @@ public class IhCatProveedor implements Serializable{
 	@Column(name = "CVEMOTIVO")
 	private String cvemotivo;
 	
-	
 	@Column(name = "USUARIO")
 	private String usuario;
 	

@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import com.hanoli.catdescuentosedocta.ApplicationConfig;
 import com.hanoli.comun.dao.GenericDAO;
+import com.hanoli.comun.exception.DAOException;
 
 public class GenericDAOImpl <T extends Serializable, K extends Serializable> implements GenericDAO<T,K> {
 	
 	@Autowired
-	@Qualifier("SessionFactory")
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	protected Session getSession() {
@@ -49,6 +50,29 @@ public class GenericDAOImpl <T extends Serializable, K extends Serializable> imp
 		}
 		
 		return session;
+	}
+	
+	
+	
+	protected void closeTransaction() throws DAOException {
+		
+		Session session;
+		Transaction transaction;
+		
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.getTransaction();
+			
+			if(transaction.getRollbackOnly()) {
+				
+				transaction.rollback();
+			}else {
+				transaction.commit();
+			}	
+		} catch (Exception e) {
+			throw new DAOException(e);
+		}
+		
 		
 		
 	}
