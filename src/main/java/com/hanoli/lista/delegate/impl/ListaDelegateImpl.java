@@ -1,14 +1,31 @@
 package com.hanoli.lista.delegate.impl;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.net.util.Base64;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import com.hanoli.lista.dao.ListaDAO;
 import com.hanoli.lista.delegate.ListaDelegate;
-import com.hanoli.lista.entity.IhCatProveedor;
+
+import com.hanoli.lista.entity.Listatmp;
+import com.hanoli.lista.model.CargaMasivaDatosIn;
+import com.hanoli.lista.model.CargaMasivaDatosOut;
 import com.hanoli.lista.model.ConsultarListaIn;
 import com.hanoli.lista.model.ConsultarListaOut;
 import com.hanoli.lista.model.ListaOut;
@@ -21,16 +38,16 @@ public class ListaDelegateImpl implements ListaDelegate{
 	private ListaDAO listaDAO;
 	
 	@Override
-	public ConsultarListaOut consultarLista(ConsultarListaIn input) {
+	public CargaMasivaDatosOut consultarLista(CargaMasivaDatosIn input) {
 		
 		//ConsultarListaOut consultarListaOut;
 		//List<IhCatProveedor> daoResponse = null;
-		ConsultarListaOut output = null;
+		CargaMasivaDatosOut output = null;
 		List<ListaOut> lista = new ArrayList<ListaOut>();
 		
 		try {
 			
-			output = new ConsultarListaOut();
+			output = new CargaMasivaDatosOut();
 			output = listaDAO.consultarListaPorParams(input);
 			
 			return output;
@@ -47,93 +64,211 @@ public class ListaDelegateImpl implements ListaDelegate{
 	}
 
 	
-	
-	
-	/*public ConsultarListaOut consultarLista(ConsultarListaIn input) {
+	public CargaMasivaDatosOut cargaMasivaDatos(CargaMasivaDatosIn input) {
 		
-	try {
+		byte[] uncode = null;
+		CargaMasivaDatosOut out = new CargaMasivaDatosOut();
 		
-	
-		Integer id = input.getLista().getId();
-		String claveProveedor = input.getLista().getClaveProveedor();
-		String fechaFinVigencia = input.getLista().getFechaServicio();
-		String claveConcepto = input.getLista().getClaveConcepto();
-		String descripcionConcepto = input.getLista().getDescripcionConcepto();
-		String estatus = input.getLista().getEstatus();
+		uncode = Base64.decodeBase64(input.getFileBase64());
 		
-		CriteriaBuilder cb = getSession().getCriteriaBuilder();
+		out = readFile(uncode,out,input);
 		
-		CriteriaQuery<IhCatProveedor> consulta = cb.createQuery(IhCatProveedor.class);
-		Root<IhCatProveedor> rootProductos = consulta.from(IhCatProveedor.class);
-		Predicate allQueryAnd = null;
-		
-		List<Predicate> filtersQuery = new ArrayList<Predicate>();
-		List<IhCatProveedor> listaProveedor = new ArrayList<IhCatProveedor>();
-		ConsultarListaOut consultaLista = new ConsultarListaOut();
-		
-		if(id != null) {
-			filtersQuery.add(cb.equal(rootProductos.get("id"), id));
-		}
-		
-		if((claveProveedor != null)&&(!claveProveedor.isEmpty())) {
-			filtersQuery.add(cb.equal(cb.upper(rootProductos.get("claveproveedor")),claveProveedor.toUpperCase()));
-		}
-
-		if((fechaFinVigencia != null)&&(!fechaFinVigencia.isEmpty())) {
-			Date dateFechaServicio = (Date) new SimpleDateFormat("dd/MM/yyyy").parse(input.getLista().getFechaServicio());
-			
-			filtersQuery.add(cb.lessThanOrEqualTo(rootProductos.get("fechainiciovigencia").as(Date.class), dateFechaServicio));
-			filtersQuery.add(cb.greaterThanOrEqualTo(rootProductos.get("fechafinvigencia").as(Date.class), dateFechaServicio));
-			
-		}
-		
-		if((claveConcepto != null) && (!claveConcepto.isEmpty())) {
-			
-			filtersQuery.add(cb.like(cb.upper(rootProductos.<String>get("claveconcepto")),"%"+claveConcepto.toUpperCase() +"%"));
-		}
-		
-		
-		if((descripcionConcepto != null) && (!descripcionConcepto.isEmpty())) {
-			
-			filtersQuery.add(cb.like(cb.upper(rootProductos.<String>get("descripcionconcepto")),"%"+descripcionConcepto.toUpperCase() +"%"));
-		}
-		
-		if((estatus != null) && (!estatus.isEmpty())) {
-			
-			filtersQuery.add(cb.like(cb.upper(rootProductos.<String>get("estatus")),"%"+estatus.toUpperCase() +"%"));
-		}
-		
-		
-		if(!filtersQuery.isEmpty()) {
-			allQueryAnd = cb.and(filtersQuery.toArray(new Predicate[filtersQuery.size()]));
-			consulta.select(rootProductos).where(allQueryAnd);
-			
-			listaProveedor = getSession().createQuery(consulta).getResultList();
-			
-			if(!listaProveedor.isEmpty()) {
-				
-				consultaLista.setLista(listaProveedor);
-				
-			}else {
-				consultaLista.setMensajeConsulta("No se encontraron datos.");
-			}
-		}else {
-			consultaLista.setMensajeConsulta("Se debe enviar almenos un parametro");
-		}
-		
-		
-		return consultaLista;
-		
-		
-	} catch (Exception e) {
-		// TODO: handle exception
-	}finally {
-		
+		return out;
 		
 	}
+	
+	
+	public CargaMasivaDatosOut readFile(byte[] uncode,CargaMasivaDatosOut out,CargaMasivaDatosIn input) {
 		
+	//	String pathFile = "C:\\uploadedFiles\\Lista de Precios Gpo Angeles_ConDepartamento - test3.xlsx"; 
+	Listatmp entry = new Listatmp();
+	DataFormatter formatter = new DataFormatter();
+	Map<String, Integer> mapNombresColumnas = new HashMap<String, Integer>();
+	int filaNombresColumnas = 0;
+	
+	
+	//File archivoExcel = new File(pathFile);
+	InputStream fis = new ByteArrayInputStream(uncode);
+	//abrir el archivo con POI
+	Workbook workbook = null;
+	try {
+		workbook = WorkbookFactory.create(fis);
 		
+		//Lee la posicion de la primera hoja
+		Sheet hoja = workbook.getSheetAt(0);
+	
+	//Accede a la posicion donde estan las columnas,normalmente es 0
+	//Row filaNombresColumna = (sheet).getRow(0);
+		Row filaNombresColumna = hoja.getRow(0);
+	
+	List<String> columnas = new ArrayList<String>();
+	List<String> columnaFilter = new ArrayList<String>();
+	
+	//Obtiene el nombre de las columnas
+     for (int cn=filaNombresColumna.getFirstCellNum(); cn<filaNombresColumna.getLastCellNum(); cn++) { 
+    	Cell c = filaNombresColumna.getCell(cn); 
+        String contenidoCelda = formatter.formatCellValue(c);
+    	
+        System.out.println("contenidoCelda: " + contenidoCelda);
+    
+    	  if(!"".equals(contenidoCelda)) {
+    		  columnas.add(contenidoCelda);  
+    	  }
+    	
+     } 
+	
+     
+     System.out.println("Se encontraron: " + columnas.size() + " Columnas");
+     
+	String[] colums = {"Calve de hospital","Clave Departamento","Clave del insumo","Nombre del Insumo","Unidad de medida del insumo","Importe unitario del insumo","Descuento por insumo","IVA del insumo (%)","Fecha Inicio de Vigencia","Fecha Fin de Vigencia","id Motivo del Cambio"};
+	
+	 	for (int i = 0; i < columnas.size(); i++) {
+			if(Arrays.asList(colums).contains(columnas.get(i))){
+				//System.out.println("Columna encontrada: " + columnas.get(i));
+				columnaFilter.add(columnas.get(i));
+			}else {
+				System.out.println("No se encontro ninguna columna: ");
+			}
+		} 
+		  
+			
+		filaNombresColumna.cellIterator().forEachRemaining(cell -> {
+	    String valorCelda = cell.getStringCellValue().trim();
+	    if (!valorCelda.isEmpty()) {
+	        mapNombresColumnas.put(valorCelda, cell.getColumnIndex());
+	    	}
+		});
+	
+
 		
-	}*/
+	int indiceDatos = filaNombresColumnas + 1;
+	Row filaDatos = null;
+	//Recorrer todas las filas con datos
+	while ((filaDatos = hoja.getRow(indiceDatos++)) != null) {
+	    //Procesa solo las celdas en base a los "nombres" de esas columnas
+	    for (String col : columnaFilter) {
+	       //el resultado de mapNombresColumnas.get(col) es el número de columna a leer en este caso, solo se imprime el resultado
+	     //  System.out.print(filaDatos.getCell(mapNombresColumnas.get(col)) + " ");
+	    	Cell contenidoFila = filaDatos.getCell(mapNombresColumnas.get(col));
+	    	
+	    	if(contenidoFila != null) {
+	    		
+	    		switch(col) {
+	    		
+	    		case "Clave de hospital":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		case "Clave Departamento":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		case "Clave del Insumo":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    		case "Nombre del insumo":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    		case "Unidad de medida del insumo":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		case "Importe unitario del insumo":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		case "Descuento por insumo":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		case "Iva del insumo (%)":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;	
+	    			
+	    		case "Fecha Inicio de Vigencia":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		case "Fecha Fin de Vigencia":
+	    			try {
+	    				entry.setClaveHospital(contenidoFila!=null?contenidoFila.getStringCellValue():"");
+	    			}catch(Exception e){
+	    				out.setMensaje("No tiene el formato correcto");
+	    			}
+	    			break;
+	    			
+	    		default:	
+	    		
+	    		}
+	    		
+	    		
+	    	}
+	    	
+	    	
+	    	
+	    	
+	    	
+	    }
+	    
+	    System.out.println();
+	}  
+		
+	
+
+	
+	
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	
+	return out; 
+
+	
+	
+	}
+
+
+
+
+
+	
+	
+	
 
 }

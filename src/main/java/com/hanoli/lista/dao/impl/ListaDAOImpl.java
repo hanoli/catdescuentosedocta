@@ -15,18 +15,23 @@ import com.hanoli.comun.dao.impl.GenericDAOImpl;
 import com.hanoli.comun.exception.DAOException;
 import com.hanoli.lista.dao.ListaDAO;
 import com.hanoli.lista.entity.IhCatProveedor;
+import com.hanoli.lista.entity.Listatmp;
+import com.hanoli.lista.model.CargaMasivaDatosIn;
+import com.hanoli.lista.model.CargaMasivaDatosOut;
 import com.hanoli.lista.model.ConsultarListaIn;
 import com.hanoli.lista.model.ConsultarListaOut;
 
 
 @Component("listaDAO")
-public class ListaDAOImpl extends GenericDAOImpl<IhCatProveedor,Integer> implements ListaDAO {
-
-	public ConsultarListaOut consultarListaPorParams(ConsultarListaIn input) throws DAOException {
+public class ListaDAOImpl extends GenericDAOImpl<Listatmp,Integer> implements ListaDAO {
+	
+	
+	public CargaMasivaDatosOut consultarListaPorParams(CargaMasivaDatosIn input) throws DAOException {
+		return null;
 		
-		ConsultarListaOut consultaLista = new ConsultarListaOut();
+		//CargaMasivaDatosOut consultaLista = new CargaMasivaDatosOut();
 		
-		try {
+		/*try {
 			
 			
 			Integer id = input.getLista().getId();
@@ -38,13 +43,13 @@ public class ListaDAOImpl extends GenericDAOImpl<IhCatProveedor,Integer> impleme
 			
 			CriteriaBuilder cb = getSession().getCriteriaBuilder();
 			
-			CriteriaQuery<IhCatProveedor> consulta = cb.createQuery(IhCatProveedor.class);
+			CriteriaQuery<Listatmp> consulta = cb.createQuery(Listatmp.class);
 		
-			Root<IhCatProveedor> rootProductos = consulta.from(IhCatProveedor.class);
+			Root<Listatmp> rootProductos = consulta.from(Listatmp.class);
 			Predicate allQueryAnd = null;
 			
 			List<Predicate> filtersQuery = new ArrayList<Predicate>();
-			List<IhCatProveedor> listaProveedor = new ArrayList<IhCatProveedor>();
+			List<Listatmp> listaProveedor = new ArrayList<Listatmp>();
 			
 			if(id != null) {
 				
@@ -79,9 +84,11 @@ public class ListaDAOImpl extends GenericDAOImpl<IhCatProveedor,Integer> impleme
 		}finally {
 			
 			closeTransaction();
-		}
+		}*/
 		
 	}
+
+	
 	
 	
 

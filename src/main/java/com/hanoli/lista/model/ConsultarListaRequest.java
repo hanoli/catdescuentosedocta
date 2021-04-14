@@ -6,7 +6,7 @@ import com.hanoli.comun.model.HeaderRequest;
 public class ConsultarListaRequest {
 
 	private HeaderRequest header;
-	private ConsultarListaIn body;
+	private CargaMasivaDatosIn body;
 	
 	public HeaderRequest getHeader() {
 		return header;
@@ -14,10 +14,10 @@ public class ConsultarListaRequest {
 	public void setHeader(HeaderRequest header) {
 		this.header = header;
 	}
-	public ConsultarListaIn getBody() {
+	public CargaMasivaDatosIn getBody() {
 		return body;
 	}
-	public void setBody(ConsultarListaIn body) {
+	public void setBody(CargaMasivaDatosIn body) {
 		this.body = body;
 	}
 	

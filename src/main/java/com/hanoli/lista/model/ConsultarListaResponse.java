@@ -5,7 +5,7 @@ import com.hanoli.comun.model.HeaderResponse;
 public class ConsultarListaResponse {
 	
 	private HeaderResponse header;
-	private ConsultarListaOut body;
+	private CargaMasivaDatosOut body;
 	
 	
 	public HeaderResponse getHeader() {
@@ -14,10 +14,10 @@ public class ConsultarListaResponse {
 	public void setHeader(HeaderResponse header) {
 		this.header = header;
 	}
-	public ConsultarListaOut getBody() {
+	public CargaMasivaDatosOut getBody() {
 		return body;
 	}
-	public void setBody(ConsultarListaOut body) {
+	public void setBody(CargaMasivaDatosOut body) {
 		this.body = body;
 	}
 	

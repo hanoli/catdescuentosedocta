@@ -30,139 +30,12 @@ public class UploadFileService {
 		
 	}
 	
-	
-	
-	  @GET
-	  @Path("/welcome")
-	  @Produces (MediaType.APPLICATION_JSON)
-	  public String sayPlainTextHello() {
-	    return "Hola han";
-	  }
-    
-    
-  /*  @POST 
-    @Path("/upload")  
-    @Consumes("multipart/form-data")
-    public Response handleDocumentUpload(@FormDataParam("file") InputStream uploadedInputStream,@FormDataParam("file") FormDataContentDisposition fileDetail){
-    	
-    	String output = null;
-    	
-    	String uploadedFileLocation = "C://uploadedFiles/" + fileDetail.getFileName(); 
-        System.out.println(uploadedFileLocation); 
-         
-        File objFile=new File(uploadedFileLocation); 
-        if(objFile.exists()) 
-        { 
-         objFile.delete(); 
-        } 
-
-        boolean resp =saveToFile(uploadedInputStream, uploadedFileLocation); 
-
-        if(resp) {
-        	output = "Archivo cargado con exito: " + uploadedFileLocation;	
-        	
-        	ReadFile(uploadedFileLocation);
-        	
-        }
-        
-        return Response.status(200).entity(output).build(); 
-        
-    } 
-    
-    private boolean saveToFile(InputStream uploadedInputStream, 
-         String uploadedFileLocation) { 
-
-    	boolean carga = false;
-    	
-        try { 
-         OutputStream out = null; 
-         int read = 0; 
-         byte[] bytes = new byte[1024]; 
-
-         out = new FileOutputStream(new File(uploadedFileLocation)); 
-         while ((read = uploadedInputStream.read(bytes)) != -1) { 
-          out.write(bytes, 0, read); 
-         } 
-         carga=true;
-         out.flush(); 
-         out.close(); 
-        } catch (IOException e) { 
-        	carga=false;
-         e.printStackTrace(); 
-        } 
-        
-        return carga;
-
-    } 
-    
-    
-    
-    public void ReadFile(String pathFile) {
-		
-    	DataFormatter formatter = new DataFormatter();
-		
-    	Map<String, Integer> mapNombresColumnas = new HashMap<String, Integer>();
-
-		final int filaNombresColumnas = 0;
-		
-		File archivoExcel = new File(pathFile);
-		//abrir el archivo con POI
-		Workbook workbook = null;
-		try {
-			workbook = WorkbookFactory.create(archivoExcel);
-		} catch (EncryptedDocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-		//Lee la posicion de la primera hoja
-		Sheet sheet = workbook.getSheetAt(0);
-		
-		//Accede a la posicion donde estan las columnas,normalmente es 0
-		Row filaNombresColumna = sheet.getRow(0);
-		
-		List<String> columnas = new ArrayList<>();
-		
-		//Obtiene el nombre de las columnas
-	     for (int cn=filaNombresColumna.getFirstCellNum(); cn<filaNombresColumna.getLastCellNum(); cn++) { 
-          Cell c = filaNombresColumna.getCell(cn); 
-          if (c == null) { 
-           // The cell is empty 
-          } else { 
-           // Process the cell 
-        	  String contenidoCelda = formatter.formatCellValue(c);
-        	  columnas.add(contenidoCelda);
-          } 
-        } 
-		
-		filaNombresColumna.cellIterator().forEachRemaining(cell -> {
-		    String valorCelda = cell.getStringCellValue().trim();
-		    if (!valorCelda.isEmpty()) {
-		        mapNombresColumnas.put(valorCelda, cell.getColumnIndex());
-		    }
-		});
-		
-	
-		int indiceDatos = filaNombresColumnas + 1;
-		Row filaDatos = null;
-		//Recorrer todas las filas con datos
-		while ((filaDatos = sheet.getRow(indiceDatos++)) != null) {
-		    //Procesa solo las celdas en base a los "nombres" de esas columnas
-		    for (String col : columnas) {
-		       //el resultado de mapNombresColumnas.get(col) es el número de columna a leer en este caso, solo se imprime el resultado
-		       System.out.print(filaDatos.getCell(mapNombresColumnas.get(col)) + " ");
-		    }
-		    
-		    System.out.println();
-		}
-		
-	}*/
+	@GET
+	@Path("/welcome")
+	@Produces (MediaType.APPLICATION_JSON)
+	public String sayPlainTextHello() {
+	  return "Hola han";
+	}
     
     
     @Path("consultar")
@@ -182,6 +55,27 @@ public class UploadFileService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
 		}
     }
+    
+    
+    @Path("cargaMasivaDatos")
+    @POST
+    @Consumes("application/json; charset=UTF-8")
+    @Produces("application/json; charset=UTF-8")
+    public Response cargaMasivaDatos(ConsultarListaRequest request) {
+    	
+    	ConsultarListaResponse resp;
+    	
+    	try {
+    		resp = new ConsultarListaResponse();
+        	resp.setHeader(HeaderHandler.handleResponseHeader(request.getHeader(), true));
+        	resp.setBody(delegate.cargaMasivaDatos(request.getBody()));
+        	return Response.status(Response.Status.OK).entity(resp).build();		
+		} catch (Exception e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+		}
+    }
+    
+    
     
     
 	
